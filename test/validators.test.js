@@ -69,11 +69,42 @@ describe('validate rating', () => {
   const validRating = {
     userId: 'OOWzUaHLsK',
     butterflyId: 'DCenP4kQNQ',
-    rating: 2
+    rating: 2.3
   };
 
-  it('is ok rating', () => {
+  it('is ok for a valid rating', () => {
     const result = validateRatings(validRating);
     expect(result).toBe(undefined);
+  });
+
+  it('throws an error when invalid', () => {
+    expect(() => {
+      validateRatings({});
+    }).toThrow('userId is required');
+
+    expect(() => {
+      validateRatings({ userId: 'OOWzUaHLsK', rating: 2.3 });
+    }).toThrow('butterflyId is required');
+
+    expect(() => {
+      validateRatings({
+        extra: 'field',
+        ...validRating
+      });
+    }).toThrow('The following keys are invalid: extra');
+
+    expect(() => {
+      validateRatings({
+        userId: [555]
+      });
+    }).toThrow('userId must be a string');
+
+    expect(() => {
+      validateRatings({
+        userId: 'OOWzUaHLsK',
+        butterflyId: 'DCenP4kQNQ',
+        rating: 55
+      });
+    }).toThrow('rating must be a number between 0 & 5 (inclusive).');
   });
 });
