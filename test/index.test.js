@@ -236,6 +236,16 @@ describe('GET rating', () => {
       error: 'User Not found'
     });
   });
+
+  it('error - empty query', async () => {
+    const response = await request(app)
+      .get('/ratings');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: 'Invalid query parameter'
+    });
+  });
 });
 
 describe('POST rating', () => {
