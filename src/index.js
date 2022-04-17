@@ -169,9 +169,9 @@ async function createApp(dbPath) {
    * Retrieve of a list of a user's rated butterflies, sorted by rating
    * GET
    */
-   app.get('/ratings/:id', async (req, res) => {
+   app.get('/ratings', async (req, res) => {
     const user = await db.get('users')
-      .find({ id: req.params.id })
+      .find({ id: req.query.userId })
       .value();
 
     if (!user) {
@@ -179,7 +179,7 @@ async function createApp(dbPath) {
     }
 
     const ratings = await db.get('ratings')
-      .filter({ userId: req.params.id })
+      .filter({ userId: req.query.userId})
       .sortBy('rating').reverse()
       .value();
 
