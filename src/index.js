@@ -113,8 +113,7 @@ async function createApp(dbPath) {
     try {
       validateRatings(req.body);
     } catch (error) {
-      console.log("error: ", error);
-      return res.status(400).json({ error: 'Invalid request body', body: req.body });
+      return res.status(400).json({ error: 'Invalid request body'});
     }
 
     // check if user exists
@@ -154,14 +153,43 @@ async function createApp(dbPath) {
     } else {
       currentRating.rating = req.body.rating;
 
-      await db.post('ratings')
+      console.log(currentRating);
+
+      await db.get('ratings')
         .find({id: currentRating.id})
         .assign({ rating: req.body.rating })
-        .value()
+        .write();
 
       res.json(currentRating);
     }
   });
+
+
+  /**
+   * Retrieve of a list of a user's rated butterflies, sorted by rating
+   * GET
+   */
+   app.get('/ratings/:id', async (req, res) => {
+    const user = await db.get('users')
+      .find({ id: req.params.id })
+      .value();
+
+    if (!user) {
+      return res.status(404).json({ error: 'User Not found' });
+    }
+
+    const ratings = await db.get('ratings')
+      .filter({ userId: req.params.id })
+      .sortBy('rating').reverse()
+      .value();
+
+    if (!ratings || ratings.length === 0) {
+      return res.json([]);
+    }
+
+    res.json(ratings);
+  });
+
 
   return app;
 };
