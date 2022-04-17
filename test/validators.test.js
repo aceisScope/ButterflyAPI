@@ -1,6 +1,6 @@
 'use strict';
 
-const { validateButterfly, validateUser, validateRatings } = require('../src/validators');
+const { validateButterfly, validateUser, validateRatings, validateUserId } = require('../src/validators');
 
 describe('validateButterfly', () => {
   const validButterfly = {
@@ -106,5 +106,35 @@ describe('validate rating', () => {
         rating: 55
       });
     }).toThrow('rating must be a number between 0 & 5 (inclusive).');
+  });
+
+  describe('validateUserId', () => {
+    const validUserId = {
+      userId: 'test-user-id'
+    };
+
+    it('is ok for a valid userId', () => {
+      const result = validateUserId(validUserId);
+      expect(result).toBe(undefined);
+    });
+
+    it('throws an error when invalid', () => {
+      expect(() => {
+        validateUserId({});
+      }).toThrow('userId is required');
+
+      expect(() => {
+        validateUserId({
+          extra: 'field',
+          ...validUserId
+        });
+      }).toThrow('The following keys are invalid: extra');
+
+      expect(() => {
+        validateUserId({
+          userId: [555]
+        });
+      }).toThrow('userId must be a string');
+    });
   });
 });

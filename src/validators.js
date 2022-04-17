@@ -24,8 +24,15 @@ const validateRatings = v.assert(
   })
 );
 
+const validateUserId = v.assert(
+  v.strictShape({
+    userId: v.required(v.string)
+  })
+);
+
 module.exports = {
   validateButterfly,
   validateUser,
-  validateRatings
+  validateRatings,
+  validateUserId
 };

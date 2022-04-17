@@ -6,7 +6,7 @@ const FileAsync = require('lowdb/adapters/FileAsync');
 const shortid = require('shortid');
 
 const constants = require('./constants');
-const { validateButterfly, validateUser, validateRatings } = require('./validators');
+const { validateButterfly, validateUser, validateRatings, validateUserId } = require('./validators');
 
 async function createApp(dbPath) {
   const app = express();
@@ -169,6 +169,12 @@ async function createApp(dbPath) {
    * GET
    */
   app.get('/ratings', async (req, res) => {
+    try {
+      validateUserId(req.query);
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid query parameter' });
+    }
+
     const user = await db.get('users')
       .find({ id: req.query.userId })
       .value();
