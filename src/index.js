@@ -1,6 +1,5 @@
 'use strict';
 
-const v = require('@mapbox/fusspot');
 const express = require('express');
 const lowdb = require('lowdb');
 const FileAsync = require('lowdb/adapters/FileAsync');
@@ -113,7 +112,7 @@ async function createApp(dbPath) {
     try {
       validateRatings(req.body);
     } catch (error) {
-      return res.status(400).json({ error: 'Invalid request body'});
+      return res.status(400).json({ error: 'Invalid request body' });
     }
 
     // check if user exists
@@ -136,7 +135,7 @@ async function createApp(dbPath) {
 
     // find, insert or update ratings
     const currentRating = await db.get('ratings')
-      .find({ userId: req.body.userId, butterflyId: req.body.butterflyId})
+      .find({ userId: req.body.userId, butterflyId: req.body.butterflyId })
       .value();
 
     if (!currentRating) {
@@ -144,11 +143,11 @@ async function createApp(dbPath) {
         id: shortid.generate(),
         ...req.body
       };
-    
+
       await db.get('ratings')
         .push(newRating)
         .write();
-      
+
       res.json(newRating);
     } else {
       currentRating.rating = req.body.rating;
@@ -156,7 +155,7 @@ async function createApp(dbPath) {
       console.log(currentRating);
 
       await db.get('ratings')
-        .find({id: currentRating.id})
+        .find({ id: currentRating.id })
         .assign({ rating: req.body.rating })
         .write();
 
@@ -169,7 +168,7 @@ async function createApp(dbPath) {
    * Retrieve of a list of a user's rated butterflies, sorted by rating
    * GET
    */
-   app.get('/ratings', async (req, res) => {
+  app.get('/ratings', async (req, res) => {
     const user = await db.get('users')
       .find({ id: req.query.userId })
       .value();
@@ -179,7 +178,7 @@ async function createApp(dbPath) {
     }
 
     const ratings = await db.get('ratings')
-      .filter({ userId: req.query.userId})
+      .filter({ userId: req.query.userId })
       .sortBy('rating').reverse()
       .value();
 
@@ -192,7 +191,7 @@ async function createApp(dbPath) {
 
 
   return app;
-};
+}
 
 /* istanbul ignore if */
 if (require.main === module) {
