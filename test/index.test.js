@@ -30,6 +30,14 @@ beforeAll(async () => {
         id: 'abcd1234',
         username: 'test-user'
       }
+    ],
+    ratings: [
+      {
+        id: 'Vih4y2yqB',
+        userId: 'abcd1234',
+        butterflyId: 'wxyz9876',
+        rating: 3.5
+      }
     ]
   }).write();
 
@@ -199,6 +207,129 @@ describe('POST user', () => {
     const response = await request(app)
       .post('/users')
       .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: 'Invalid request body'
+    });
+  });
+});
+
+describe('GET rating', () => {
+  it('success', async () => {
+    const response = await request(app)
+      .get('/ratings?userId=abcd1234');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([{
+      id: 'Vih4y2yqB',
+      userId: 'abcd1234',
+      butterflyId: 'wxyz9876',
+      rating: 3.5
+    }]);
+  });
+
+  it('error - not found', async () => {
+    const response = await request(app)
+      .get('/ratings?userId=bad-id');
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: 'User Not found'
+    });
+  });
+});
+
+describe('POST rating', () => {
+  it('success', async () => {
+    shortid.generate = jest.fn().mockReturnValue('new-rating-id');
+
+    const postResponse = await request(app)
+      .post('/ratings')
+      .send({
+        userId: 'abcd1234',
+        butterflyId: 'wxyz9876',
+        rating: 4
+      });
+
+    expect(postResponse.status).toBe(200);
+    expect(postResponse.body).toEqual({
+      id: 'Vih4y2yqB',
+      userId: 'abcd1234',
+      butterflyId: 'wxyz9876',
+      rating: 4
+    });
+
+    const getResponse = await request(app)
+      .get('/ratings?userId=abcd1234');
+
+    expect(getResponse.status).toBe(200);
+    expect(getResponse.body).toEqual([{
+      id: 'Vih4y2yqB',
+      userId: 'abcd1234',
+      butterflyId: 'wxyz9876',
+      rating: 4
+    }]);
+  });
+
+  it('error - empty body', async () => {
+    const response = await request(app)
+      .post('/ratings')
+      .send();
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: 'Invalid request body'
+    });
+  });
+
+  it('error - missing all attributes', async () => {
+    const response = await request(app)
+      .post('/ratings')
+      .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: 'Invalid request body'
+    });
+  });
+
+  it('error - invalid userId', async () => {
+    const response = await request(app)
+      .post('/ratings')
+      .send({
+        userId: 'bad-id',
+        butterflyId: 'wxyz9876',
+        rating: 4
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: 'User Not found'
+    });
+  });
+
+  it('error - invalid butterflyId', async () => {
+    const response = await request(app)
+      .post('/ratings')
+      .send({
+        userId: 'abcd1234',
+        butterflyId: 'bad-id',
+        rating: 4
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: 'Butterfly Not found'
+    });
+  });
+
+  it('error - invalid rating', async () => {
+    const response = await request(app)
+      .post('/ratings')
+      .send({
+        userId: 'abcd1234',
+        butterflyId: 'wxyz9876',
+        rating: 10
+      });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
