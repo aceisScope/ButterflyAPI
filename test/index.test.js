@@ -228,6 +228,13 @@ describe('GET rating', () => {
     }]);
   });
 
+  it('success - empty response', async () => {
+    const response = await request(app)
+      .get('/ratings?userId=new-user-id');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
   it('error - not found', async () => {
     const response = await request(app)
       .get('/ratings?userId=bad-id');
